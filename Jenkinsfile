@@ -20,6 +20,12 @@ pipeline {
             }
         }
 
+        stage('Test Kubernetes Access') {
+            steps {
+                bat 'kubectl get nodes'
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 bat 'kubectl apply -f deployment.yaml'
