@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git 'https://github.com/Sehaj0007/blue-green-devops-project.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t %DOCKER_IMAGE% app'
