@@ -2,35 +2,53 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "sehaj07/bluegreen-app:v1"
+        IMAGE_NAME = "sehaj07/bluegreen-app"
+        IMAGE_TAG = "v3"
     }
 
     stages {
 
-        stage('Test Kubernetes Access') {
-            steps {
-                bat 'kubectl get nodes'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                bat 'dir'
-                bat 'docker build -t %DOCKER_IMAGE% .'
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                bat 'docker push %DOCKER_IMAGE%'
+                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy Green') {
             steps {
-                bat 'kubectl apply -f deployment.yaml'
-                bat 'kubectl apply -f service.yaml'
+                bat '''
+                kubectl set image deployment/green-app green-app-container=%IMAGE_NAME%:%IMAGE_TAG%
+                '''
             }
         }
+
+        stage('Wait for Pods') {
+            steps {
+                bat "timeout /t 15"
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                bat '''
+                kubectl get pods
+                '''
+            }
+        }
+
+        stage('Switch Traffic to Green') {
+            steps {
+                bat '''
+                kubectl patch service blue-service -p "{\\"spec\\":{\\"selector\\":{\\"app\\":\\"green-app\\"}}}"
+                '''
+            }
+        }
+
     }
 }
