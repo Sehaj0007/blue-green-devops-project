@@ -7,6 +7,12 @@ pipeline {
 
     stages {
 
+        stage('Test Kubernetes Access') {
+            steps {
+                bat 'kubectl get nodes'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 bat 'dir'
@@ -17,12 +23,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 bat 'docker push %DOCKER_IMAGE%'
-            }
-        }
-
-        stage('Test Kubernetes Access') {
-            steps {
-                bat 'kubectl get nodes'
             }
         }
 
