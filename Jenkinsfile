@@ -28,13 +28,9 @@ pipeline {
             }
         }
 
-        stage('Wait for Pods') {
+        stage('Wait for Green Ready') {
             steps {
-                stage('Wait for Green Ready') {
-                    steps {
-                        bat "kubectl rollout status deployment/green-app"
-                    }
-                }
+                bat "kubectl rollout status deployment/green-app"
             }
         }
 
