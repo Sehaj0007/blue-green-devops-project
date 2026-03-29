@@ -3,14 +3,14 @@ pipeline {
 
     environment {
         IMAGE_NAME = "sehaj07/bluegreen-app"
-        IMAGE_TAG = "v3"
+        IMAGE_TAG = "v4"
     }
 
     stages {
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
+                bat "docker build --no-cache -t %IMAGE_NAME%:%IMAGE_TAG% ."
             }
         }
 
