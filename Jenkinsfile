@@ -36,16 +36,16 @@ pipeline {
             steps {
                 script {
                     def response = bat(
-                        script: "curl http://localhost:3000",
-                        returnStdout: true
-                    )
+                    script: 'curl http://127.0.0.1:64920',
+                    returnStdout: true
+                )
 
-                    if (!response.contains("Version 2")) {
-                        error("App is not healthy!")
-                    }
+                if (!response.contains("Version 2")) {
+                    error("App is not healthy!")
                 }
             }
         }
+    }
 
         stage('Switch Traffic') {
             steps {
