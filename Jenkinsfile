@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "sehaj07/bluegreen-app"
-        IMAGE_TAG = "final"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -37,13 +37,8 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    def url = bat(
-                        script: 'minikube service blue-service --url',
-                        returnStdout: true
-                    ).trim()
-
                     def response = bat(
-                        script: "curl ${url}",
+                        script: "curl http://192.168.49.2:30007",
                         returnStdout: true
                     )
 
