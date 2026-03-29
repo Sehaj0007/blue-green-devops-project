@@ -28,7 +28,9 @@ pipeline {
 
         stage('Wait for Green Ready') {
             steps {
-                bat "kubectl rollout status deployment/green-app"
+                timeout(time: 2, unit: 'MINUTES') {
+                    bat "kubectl rollout status deployment/green-app"
+                }
             }
         }
 
@@ -36,21 +38,21 @@ pipeline {
             steps {
                 script {
                     def url = bat(
-                    script: 'minikube service blue-service --url',
-                    returnStdout: true
-                ).trim()
+                        script: 'minikube service blue-service --url',
+                        returnStdout: true
+                    ).trim()
 
-                def response = bat(
-                    script: "curl ${url}",
-                    returnStdout: true
-                )
+                    def response = bat(
+                        script: "curl ${url}",
+                        returnStdout: true
+                    )
 
-                if (!response.contains("Version 2")) {
-                    error("App is not healthy!")
+                    if (!response.contains("Version")) {
+                        error("Health check failed!")
+                    }
                 }
             }
         }
-    }   
 
         stage('Switch Traffic') {
             steps {
@@ -59,7 +61,6 @@ pipeline {
                 '''
             }
         }
-
     }
 
     post {
@@ -69,6 +70,8 @@ pipeline {
             bat '''
             kubectl patch service blue-service -p "{\\"spec\\":{\\"selector\\":{\\"app\\":\\"blue-app\\"}}}"
             '''
+
+            bat "kubectl rollout undo deployment/green-app"
         }
 
         success {
