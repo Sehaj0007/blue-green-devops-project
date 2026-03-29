@@ -37,19 +37,18 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    // Start port-forward in background
-                    bat 'start /B kubectl port-forward service/blue-service 8080:80'
+                    // Forward GREEN deployment
+                    bat 'start /B kubectl port-forward deployment/green-app 8081:3000'
 
-                    // Wait a bit for it to establish
                     sleep 5
 
                     def response = bat(
-                        script: "curl http://localhost:8080",
+                        script: "curl http://localhost:8081",
                         returnStdout: true
                     )
 
                     if (!response.contains("Version")) {
-                        error("Health check failed!")
+                        error("Green deployment is not healthy!")
                     }
                 }
             }
