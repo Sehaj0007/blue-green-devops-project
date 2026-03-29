@@ -35,10 +35,13 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    def status = bat(script: "kubectl get pods", returnStatus: true)
-                    
-                    if (status != 0) {
-                        error("Health check failed!")
+                    def response = bat(
+                        script: "curl http://localhost:3000",
+                        returnStdout: true
+                    )
+
+                    if (!response.contains("Version 2")) {
+                        error("App is not healthy!")
                     }
                 }
             }
