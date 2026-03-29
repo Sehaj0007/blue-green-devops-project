@@ -30,7 +30,11 @@ pipeline {
 
         stage('Wait for Pods') {
             steps {
-                bat "ping 127.0.0.1 -n 15 > nul"
+                stage('Wait for Green Ready') {
+                    steps {
+                        bat "kubectl rollout status deployment/green-app"
+                    }
+                }
             }
         }
 
