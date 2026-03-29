@@ -35,8 +35,13 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    def response = bat(
-                    script: 'curl http://127.0.0.1:64920',
+                    def url = bat(
+                    script: 'minikube service blue-service --url',
+                    returnStdout: true
+                ).trim()
+
+                def response = bat(
+                    script: "curl ${url}",
                     returnStdout: true
                 )
 
@@ -45,7 +50,7 @@ pipeline {
                 }
             }
         }
-    }
+    }   
 
         stage('Switch Traffic') {
             steps {
