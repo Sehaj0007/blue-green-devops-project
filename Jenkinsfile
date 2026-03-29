@@ -37,8 +37,14 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
+                    // Start port-forward in background
+                    bat 'start /B kubectl port-forward service/blue-service 8080:80'
+
+                    // Wait a bit for it to establish
+                    sleep 5
+
                     def response = bat(
-                        script: "curl http://192.168.49.2:30007",
+                        script: "curl http://localhost:8080",
                         returnStdout: true
                     )
 
