@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "sehaj07/bluegreen-app"
-        IMAGE_TAG = "v4"
+        IMAGE_TAG = "final"
     }
 
     stages {
@@ -22,9 +22,7 @@ pipeline {
 
         stage('Deploy Green') {
             steps {
-                bat '''
-                kubectl set image deployment/green-app green-app-container=%IMAGE_NAME%:%IMAGE_TAG%
-                '''
+                bat "kubectl set image deployment/green-app green-app-container=%IMAGE_NAME%:%IMAGE_TAG%"
             }
         }
 
@@ -36,13 +34,17 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                bat '''
-                kubectl get pods
-                '''
+                script {
+                    def status = bat(script: "kubectl get pods", returnStatus: true)
+                    
+                    if (status != 0) {
+                        error("Health check failed!")
+                    }
+                }
             }
         }
 
-        stage('Switch Traffic to Green') {
+        stage('Switch Traffic') {
             steps {
                 bat '''
                 kubectl patch service blue-service -p "{\\"spec\\":{\\"selector\\":{\\"app\\":\\"green-app\\"}}}"
@@ -50,5 +52,19 @@ pipeline {
             }
         }
 
+    }
+
+    post {
+        failure {
+            echo "❌ Deployment failed! Rolling back..."
+
+            bat '''
+            kubectl patch service blue-service -p "{\\"spec\\":{\\"selector\\":{\\"app\\":\\"blue-app\\"}}}"
+            '''
+        }
+
+        success {
+            echo "✅ Deployment successful! Running on GREEN"
+        }
     }
 }
